@@ -1,4 +1,5 @@
 import Link from "next/link";
+import HeritageImage from "@/components/ui/HeritageImage";
 
 import {
   SCHOOL_NAME,
@@ -12,6 +13,8 @@ const heritageEras = [
     year: "1963",
     abbreviation: "BMC",
     name: "Basel Mission College",
+    image: "/images/home/home-history-bmc.png",
+    imageAlt: "Historical photograph representing Basel Mission College in Kumba",
     description:
       "The institution opened in Fiango, Kumba, beginning a proud tradition of learning, discipline and Christian education.",
   },
@@ -19,6 +22,9 @@ const heritageEras = [
     year: "The Transition",
     abbreviation: "PSS",
     name: "Presbyterian Secondary School",
+    image: "/images/home/home-history-pss.png",
+    imageAlt:
+      "Historical photograph representing Presbyterian Secondary School in Kumba",
     description:
       "A new chapter strengthened the Presbyterian identity and continued the school's commitment to academic and moral excellence.",
   },
@@ -26,6 +32,9 @@ const heritageEras = [
     year: "Our Heritage Today",
     abbreviation: "PHS",
     name: "Presbyterian High School, Kumba",
+    image: "/images/home/home-history-phs.png",
+    imageAlt:
+      "Recent photograph representing Presbyterian High School Kumba",
     description:
       "Now located along Mbonge Road, PHS Kumba continues to shape generations through service, knowledge and integrity.",
   },
@@ -74,6 +83,9 @@ const highlights = [
   {
     label: "Our History",
     title: "From Fiango to Mbonge Road",
+    image: "/images/home/home-highlight-history.png",
+    imageAlt:
+      "Historical photograph showing the heritage of Presbyterian High School Kumba",
     description:
       "Explore the journey from Basel Mission College through Presbyterian Secondary School to Presbyterian High School, Kumba.",
     href: "/about",
@@ -82,6 +94,9 @@ const highlights = [
   {
     label: "Our Community",
     title: "Kupexsans Across Generations",
+    image: "/images/home/home-highlight-directory.png",
+    imageAlt:
+      "Kupexsans from different generations gathered as one alumni community",
     description:
       "Meet alumni from different classes, professions, chapters and countries through the KUPEXSA member directory.",
     href: "/directory",
@@ -90,6 +105,8 @@ const highlights = [
   {
     label: "Our Gatherings",
     title: "Celebrating Together",
+    image: "/images/home/home-highlight-events.png",
+    imageAlt: "KUPEXSA alumni attending a reunion or community event",
     description:
       "Follow upcoming reunions, chapter activities, annual meetings and the historic 2027 jubilee celebration.",
     href: "/events",
@@ -170,59 +187,72 @@ export default function Home() {
             <div className="absolute -bottom-8 -right-8 h-44 w-44 rounded-full bg-yellow-400/10 blur-2xl" />
 
             <div className="relative overflow-hidden rounded-[2rem] border border-white/15 bg-white/10 p-5 shadow-2xl shadow-black/30 backdrop-blur">
-              <div className="rounded-[1.5rem] border border-yellow-400/20 bg-blue-900/80 p-7 sm:p-9">
-                <p className="text-xs font-bold uppercase tracking-[0.3em] text-yellow-300">
-                  Our Heritage
-                </p>
+              <div className="overflow-hidden rounded-[1.5rem] border border-yellow-400/20 bg-blue-900/80">
+                <div className="relative overflow-hidden">
+                  <HeritageImage
+                    src="/images/home/home-hero.png"
+                    alt="Presbyterian High School Kumba and the KUPEXSA community"
+                    label="PHS Kumba Heritage"
+                    className="h-[230px] w-full sm:h-[260px]"
+                  />
 
-                <div className="mt-8 space-y-5">
-                  <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-                    <p className="text-xs font-bold uppercase tracking-widest text-blue-200">
-                      Established as
-                    </p>
-                    <h2 className="mt-2 text-2xl font-black">
-                      Basel Mission College
-                    </h2>
-                    <p className="mt-1 font-semibold text-yellow-300">BMC</p>
-                  </div>
-
-                  <div className="flex justify-center">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full border border-yellow-400/40 bg-yellow-400/10 text-yellow-300">
-                      ↓
-                    </div>
-                  </div>
-
-                  <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-                    <p className="text-xs font-bold uppercase tracking-widest text-blue-200">
-                      Later became
-                    </p>
-                    <h2 className="mt-2 text-2xl font-black">
-                      Presbyterian Secondary School
-                    </h2>
-                    <p className="mt-1 font-semibold text-yellow-300">PSS</p>
-                  </div>
-
-                  <div className="flex justify-center">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full border border-yellow-400/40 bg-yellow-400/10 text-yellow-300">
-                      ↓
-                    </div>
-                  </div>
-
-                  <div className="rounded-2xl border border-yellow-400/30 bg-yellow-400/10 p-5">
-                    <p className="text-xs font-bold uppercase tracking-widest text-yellow-300">
-                      Known today as
-                    </p>
-                    <h2 className="mt-2 text-2xl font-black">
-                      Presbyterian High School
-                    </h2>
-                    <p className="mt-1 font-semibold text-white">PHS Kumba</p>
-                  </div>
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-blue-900/80 via-transparent to-transparent" />
                 </div>
 
-                <div className="mt-7 rounded-2xl bg-white px-5 py-4 text-center text-blue-950">
-                  <p className="text-sm font-black uppercase tracking-[0.18em]">
-                    {KUPEXSA_SLOGAN}
+                <div className="p-7 sm:p-9">
+                  <p className="text-xs font-bold uppercase tracking-[0.3em] text-yellow-300">
+                    Our Heritage
                   </p>
+
+                  <div className="mt-6 space-y-4">
+                    <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+                      <p className="text-xs font-bold uppercase tracking-widest text-blue-200">
+                        Established as
+                      </p>
+                      <h2 className="mt-2 text-2xl font-black">
+                        Basel Mission College
+                      </h2>
+                      <p className="mt-1 font-semibold text-yellow-300">BMC</p>
+                    </div>
+
+                    <div className="flex justify-center">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-full border border-yellow-400/40 bg-yellow-400/10 text-yellow-300">
+                        ↓
+                      </div>
+                    </div>
+
+                    <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+                      <p className="text-xs font-bold uppercase tracking-widest text-blue-200">
+                        Later became
+                      </p>
+                      <h2 className="mt-2 text-2xl font-black">
+                        Presbyterian Secondary School
+                      </h2>
+                      <p className="mt-1 font-semibold text-yellow-300">PSS</p>
+                    </div>
+
+                    <div className="flex justify-center">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-full border border-yellow-400/40 bg-yellow-400/10 text-yellow-300">
+                        ↓
+                      </div>
+                    </div>
+
+                    <div className="rounded-2xl border border-yellow-400/30 bg-yellow-400/10 p-5">
+                      <p className="text-xs font-bold uppercase tracking-widest text-yellow-300">
+                        Known today as
+                      </p>
+                      <h2 className="mt-2 text-2xl font-black">
+                        Presbyterian High School
+                      </h2>
+                      <p className="mt-1 font-semibold text-white">PHS Kumba</p>
+                    </div>
+                  </div>
+
+                  <div className="mt-7 rounded-2xl bg-white px-5 py-4 text-center text-blue-950">
+                    <p className="text-sm font-black uppercase tracking-[0.18em]">
+                      {KUPEXSA_SLOGAN}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -233,16 +263,23 @@ export default function Home() {
       {/* Introduction */}
       <section className="relative">
         <div className="mx-auto grid max-w-7xl gap-12 px-6 py-24 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:px-8">
-          <div className="relative min-h-[470px] overflow-hidden rounded-[2rem] bg-blue-950 p-8 text-white shadow-xl">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(212,175,55,0.25),transparent_35%)]" />
+          <div className="relative min-h-[470px] overflow-hidden rounded-[2rem] text-white shadow-xl">
+            <HeritageImage
+              src="/images/home/home-heritage.png"
+              alt="Historical heritage of Presbyterian High School Kumba"
+              label={`PHS Kumba Heritage Since ${FOUNDATION_YEAR}`}
+              className="h-[470px] w-full"
+            />
 
-            <div className="relative flex h-full min-h-[406px] flex-col justify-between">
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-blue-950 via-blue-950/55 to-blue-950/10" />
+
+            <div className="absolute inset-0 flex flex-col justify-between p-8">
               <div>
                 <p className="text-sm font-bold uppercase tracking-[0.25em] text-yellow-300">
                   Since {FOUNDATION_YEAR}
                 </p>
 
-                <p className="mt-5 text-7xl font-black text-white/10 sm:text-8xl">
+                <p className="mt-5 text-7xl font-black text-white/20 sm:text-8xl">
                   PHS
                 </p>
               </div>
@@ -326,27 +363,38 @@ export default function Home() {
             {heritageEras.map((era, index) => (
               <article
                 key={era.abbreviation}
-                className="relative rounded-3xl border border-gray-200 bg-white p-8 shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
+                className="relative overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
               >
-                <div className="relative z-10 flex h-24 w-24 items-center justify-center rounded-full border-8 border-gray-50 bg-blue-950 text-2xl font-black text-yellow-400">
-                  {era.abbreviation}
+                <div className="relative">
+                  <HeritageImage
+                    src={era.image}
+                    alt={era.imageAlt}
+                    label={era.name}
+                    className="h-56 w-full"
+                  />
+
+                  <div className="absolute bottom-4 left-5 flex h-16 w-16 items-center justify-center rounded-full border-4 border-white bg-blue-950 text-lg font-black text-yellow-400 shadow-lg">
+                    {era.abbreviation}
+                  </div>
                 </div>
 
-                <p className="mt-7 text-sm font-black uppercase tracking-widest text-yellow-600">
-                  {era.year}
-                </p>
+                <div className="p-8 pt-7">
+                  <p className="text-sm font-black uppercase tracking-widest text-yellow-600">
+                    {era.year}
+                  </p>
 
-                <h3 className="mt-3 text-2xl font-black text-blue-950">
-                  {era.name}
-                </h3>
+                  <h3 className="mt-3 text-2xl font-black text-blue-950">
+                    {era.name}
+                  </h3>
 
-                <p className="mt-4 leading-7 text-gray-600">
-                  {era.description}
-                </p>
+                  <p className="mt-4 leading-7 text-gray-600">
+                    {era.description}
+                  </p>
 
-                <p className="mt-6 text-sm font-bold text-blue-900">
-                  Chapter {String(index + 1).padStart(2, "0")}
-                </p>
+                  <p className="mt-6 text-sm font-bold text-blue-900">
+                    Chapter {String(index + 1).padStart(2, "0")}
+                  </p>
+                </div>
               </article>
             ))}
           </div>
@@ -355,7 +403,18 @@ export default function Home() {
 
       {/* Community Statement */}
       <section className="bg-blue-950 text-white">
-        <div className="mx-auto grid max-w-7xl gap-12 px-6 py-20 lg:grid-cols-[1fr_1.2fr] lg:items-center lg:px-8">
+        <div className="mx-auto grid max-w-7xl gap-12 px-6 py-20 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:px-8">
+          <div className="relative overflow-hidden rounded-[2rem] border border-white/15 shadow-2xl">
+            <HeritageImage
+              src="/images/home/home-community.png"
+              alt="Kupexsans gathered together as one global alumni community"
+              label="The KUPEXSA Community"
+              className="h-[380px] w-full"
+            />
+
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-blue-950/70 via-transparent to-transparent" />
+          </div>
+
           <div>
             <p className="text-sm font-bold uppercase tracking-[0.25em] text-yellow-300">
               Kupexsan identity
@@ -367,30 +426,30 @@ export default function Home() {
                 Connected wherever we go.
               </span>
             </h2>
-          </div>
 
-          <div className="grid gap-5 sm:grid-cols-3">
-            <div className="rounded-2xl border border-white/15 bg-white/5 p-6">
-              <p className="text-4xl font-black text-yellow-400">
-                {FOUNDATION_YEAR}
-              </p>
-              <p className="mt-2 font-semibold text-blue-100">
-                Foundation of our legacy
-              </p>
-            </div>
+            <div className="mt-9 grid gap-5 sm:grid-cols-3">
+              <div className="rounded-2xl border border-white/15 bg-white/5 p-6">
+                <p className="text-4xl font-black text-yellow-400">
+                  {FOUNDATION_YEAR}
+                </p>
+                <p className="mt-2 font-semibold text-blue-100">
+                  Foundation of our legacy
+                </p>
+              </div>
 
-            <div className="rounded-2xl border border-white/15 bg-white/5 p-6">
-              <p className="text-4xl font-black text-yellow-400">Global</p>
-              <p className="mt-2 font-semibold text-blue-100">
-                Alumni community
-              </p>
-            </div>
+              <div className="rounded-2xl border border-white/15 bg-white/5 p-6">
+                <p className="text-4xl font-black text-yellow-400">Global</p>
+                <p className="mt-2 font-semibold text-blue-100">
+                  Alumni community
+                </p>
+              </div>
 
-            <div className="rounded-2xl border border-white/15 bg-white/5 p-6">
-              <p className="text-4xl font-black text-yellow-400">One</p>
-              <p className="mt-2 font-semibold text-blue-100">
-                KUPEXSA family
-              </p>
+              <div className="rounded-2xl border border-white/15 bg-white/5 p-6">
+                <p className="text-4xl font-black text-yellow-400">One</p>
+                <p className="mt-2 font-semibold text-blue-100">
+                  KUPEXSA family
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -419,23 +478,24 @@ export default function Home() {
           </div>
 
           <div className="mt-14 grid gap-7 lg:grid-cols-3">
-            {highlights.map((item, index) => (
+            {highlights.map((item) => (
               <article
                 key={item.title}
                 className="group overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
               >
-                <div className="relative h-56 overflow-hidden bg-blue-950 p-7 text-white">
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(212,175,55,0.28),transparent_36%)]" />
+                <div className="relative overflow-hidden">
+                  <HeritageImage
+                    src={item.image}
+                    alt={item.imageAlt}
+                    label={item.label}
+                    className="h-56 w-full"
+                  />
 
-                  <div className="relative flex h-full flex-col justify-between">
-                    <p className="text-sm font-bold uppercase tracking-[0.22em] text-yellow-300">
-                      {item.label}
-                    </p>
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-blue-950/85 via-blue-950/10 to-transparent" />
 
-                    <p className="text-8xl font-black text-white/10">
-                      0{index + 1}
-                    </p>
-                  </div>
+                  <p className="absolute bottom-5 left-6 text-sm font-bold uppercase tracking-[0.22em] text-yellow-300">
+                    {item.label}
+                  </p>
                 </div>
 
                 <div className="p-7">
@@ -507,16 +567,23 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-6 py-24 lg:px-8">
           <div className="overflow-hidden rounded-[2rem] bg-blue-950 text-white shadow-2xl">
             <div className="grid lg:grid-cols-[0.9fr_1.1fr]">
-              <div className="relative min-h-[360px] bg-blue-900 p-9">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(212,175,55,0.32),transparent_38%)]" />
+              <div className="relative min-h-[360px]">
+                <HeritageImage
+                  src="/images/home/home-jubilee-2027.png"
+                  alt="KUPEXSA alumni celebration representing the 2027 jubilee"
+                  label="KUPEXSA Jubilee 2027"
+                  className="h-full min-h-[360px] w-full"
+                />
 
-                <div className="relative flex h-full flex-col justify-between">
-                  <div className="inline-flex w-fit rounded-full border border-yellow-400/40 bg-yellow-400/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-yellow-300">
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-blue-950/90 via-blue-950/20 to-transparent" />
+
+                <div className="absolute inset-0 flex flex-col justify-between p-9">
+                  <div className="inline-flex w-fit rounded-full border border-yellow-400/40 bg-blue-950/50 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-yellow-300 backdrop-blur">
                     Featured Event
                   </div>
 
                   <div>
-                    <p className="text-8xl font-black text-white/10">2027</p>
+                    <p className="text-8xl font-black text-white/30">2027</p>
                     <p className="mt-2 text-lg font-bold text-yellow-300">
                       A historic gathering
                     </p>
