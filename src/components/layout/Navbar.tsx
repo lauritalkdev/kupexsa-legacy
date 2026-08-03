@@ -22,6 +22,11 @@ const navigationLinks = [
   {
     name: "Events",
     href: "/events",
+
+  },
+  {
+    name: "Projects",
+    href: "/projects",
   },
 ];
 
