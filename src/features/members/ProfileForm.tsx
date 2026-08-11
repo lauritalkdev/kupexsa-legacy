@@ -30,6 +30,8 @@ type Profile = {
   country_id: string | null;
   chapter_id: string | null;
   occupation_id: string | null;
+  custom_chapter: string | null;
+  custom_occupation: string | null;
   company: string | null;
   marital_status: MaritalStatus | null;
   biography: string | null;
@@ -128,8 +130,14 @@ export default function ProfileForm({
   const [badgeId, setBadgeId] = useState(profile.badge_id ?? "");
   const [countryId, setCountryId] = useState(profile.country_id ?? "");
   const [chapterId, setChapterId] = useState(profile.chapter_id ?? "");
+  const [customChapter, setCustomChapter] = useState(
+    profile.custom_chapter ?? ""
+  );
   const [occupationId, setOccupationId] = useState(
     profile.occupation_id ?? ""
+  );
+  const [customOccupation, setCustomOccupation] = useState(
+    profile.custom_occupation ?? ""
   );
   const [company, setCompany] = useState(profile.company ?? "");
   const [maritalStatus, setMaritalStatus] = useState<
@@ -154,6 +162,18 @@ export default function ProfileForm({
     );
   }, [chapters, countryId]);
 
+  const otherOccupation = useMemo(
+    () =>
+      occupations.find(
+        (occupation) => occupation.name.trim().toLowerCase() === "other"
+      ) ?? null,
+    [occupations]
+  );
+
+  const isOtherChapter = chapterId === "__other__";
+  const isOtherOccupation =
+    Boolean(otherOccupation) && occupationId === otherOccupation?.id;
+
   const profileFields = [
     fullName,
     preferredName,
@@ -165,8 +185,8 @@ export default function ProfileForm({
     graduationYear,
     badgeId,
     countryId,
-    chapterId,
-    occupationId,
+    isOtherChapter ? customChapter : chapterId,
+    isOtherOccupation ? customOccupation : occupationId,
     company,
     maritalStatus,
     biography,
@@ -184,6 +204,10 @@ export default function ProfileForm({
     setCountryId(value);
 
     if (!value) {
+      return;
+    }
+
+    if (chapterId === "__other__") {
       return;
     }
 
@@ -227,6 +251,18 @@ export default function ProfileForm({
       return;
     }
 
+    if (isOtherChapter && !customChapter.trim()) {
+      setMessage("Please enter your KUPEXSA chapter.");
+      setMessageType("error");
+      return;
+    }
+
+    if (isOtherOccupation && !customOccupation.trim()) {
+      setMessage("Please enter your occupation.");
+      setMessageType("error");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -245,8 +281,14 @@ export default function ProfileForm({
           graduation_year: parsedGraduationYear,
           badge_id: badgeId || null,
           country_id: countryId || null,
-          chapter_id: chapterId || null,
+          chapter_id: isOtherChapter ? null : chapterId || null,
+          custom_chapter: isOtherChapter
+            ? optionalValue(customChapter)
+            : null,
           occupation_id: occupationId || null,
+          custom_occupation: isOtherOccupation
+            ? optionalValue(customOccupation)
+            : null,
           company: optionalValue(company),
           marital_status: maritalStatus || null,
           biography: optionalValue(biography),
@@ -644,7 +686,14 @@ export default function ProfileForm({
               id="chapter"
               name="chapter_id"
               value={chapterId}
-              onChange={(event) => setChapterId(event.target.value)}
+              onChange={(event) => {
+                const value = event.target.value;
+                setChapterId(value);
+
+                if (value !== "__other__") {
+                  setCustomChapter("");
+                }
+              }}
               className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 outline-none transition focus:border-blue-700 focus:ring-2 focus:ring-blue-100"
             >
               <option value="">Select chapter</option>
@@ -655,8 +704,31 @@ export default function ProfileForm({
                   {chapter.city ? ` — ${chapter.city}` : ""}
                 </option>
               ))}
+
+              <option value="__other__">Other</option>
             </select>
           </div>
+
+          {isOtherChapter && (
+            <div className="md:col-span-2">
+              <label
+                htmlFor="custom-chapter"
+                className="mb-2 block text-sm font-semibold text-blue-950"
+              >
+                Enter Your KUPEXSA Chapter
+              </label>
+
+              <input
+                id="custom-chapter"
+                name="custom_chapter"
+                value={customChapter}
+                onChange={(event) => setCustomChapter(event.target.value)}
+                placeholder="e.g. Bamenda Chapter"
+                required
+                className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-blue-700 focus:ring-2 focus:ring-blue-100"
+              />
+            </div>
+          )}
         </div>
 
         <div className="my-10 border-t border-gray-200" />
@@ -684,9 +756,14 @@ export default function ProfileForm({
               id="occupation"
               name="occupation_id"
               value={occupationId}
-              onChange={(event) =>
-                setOccupationId(event.target.value)
-              }
+              onChange={(event) => {
+                const value = event.target.value;
+                setOccupationId(value);
+
+                if (value !== otherOccupation?.id) {
+                  setCustomOccupation("");
+                }
+              }}
               className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 outline-none transition focus:border-blue-700 focus:ring-2 focus:ring-blue-100"
             >
               <option value="">Select occupation</option>
@@ -698,6 +775,27 @@ export default function ProfileForm({
               ))}
             </select>
           </div>
+
+          {isOtherOccupation && (
+            <div>
+              <label
+                htmlFor="custom-occupation"
+                className="mb-2 block text-sm font-semibold text-blue-950"
+              >
+                Enter Your Occupation
+              </label>
+
+              <input
+                id="custom-occupation"
+                name="custom_occupation"
+                value={customOccupation}
+                onChange={(event) => setCustomOccupation(event.target.value)}
+                placeholder="Enter your occupation"
+                required
+                className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-blue-700 focus:ring-2 focus:ring-blue-100"
+              />
+            </div>
+          )}
 
           <div>
             <label

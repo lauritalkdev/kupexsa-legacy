@@ -11,6 +11,10 @@ type ChapterRelation = {
   name: string | null;
 };
 
+type BadgeRelation = {
+  badge_year: number | null;
+};
+
 type MemberProfile = {
   id: string;
   member_id: string | null;
@@ -33,6 +37,7 @@ type MemberProfile = {
   profile_photo: string | null;
   status: MemberStatus;
   chapters: ChapterRelation | ChapterRelation[] | null;
+  badges: BadgeRelation | BadgeRelation[] | null;
 };
 
 function getChapterName(chapters: MemberProfile["chapters"]) {
@@ -41,6 +46,14 @@ function getChapterName(chapters: MemberProfile["chapters"]) {
   }
 
   return chapters?.name ?? null;
+}
+
+function getBadgeYear(badges: MemberProfile["badges"]) {
+  if (Array.isArray(badges)) {
+    return badges[0]?.badge_year ?? null;
+  }
+
+  return badges?.badge_year ?? null;
 }
 
 function getStatusDetails(status: MemberStatus) {
@@ -211,7 +224,8 @@ export default async function DashboardPage() {
         biography,
         profile_photo,
         status,
-        chapters(name)
+        chapters(name),
+        badges(badge_year)
       `
     )
     .eq("id", user.id)
@@ -254,10 +268,12 @@ export default async function DashboardPage() {
     profile_photo: null,
     status: "pending",
     chapters: null,
+    badges: null,
   };
 
   const profile = (profileData as MemberProfile | null) ?? fallbackProfile;
   const chapterName = getChapterName(profile.chapters);
+  const badgeYear = getBadgeYear(profile.badges);
   const statusDetails = getStatusDetails(profile.status);
   const profileCompletion = calculateProfileCompletion(profile);
 
@@ -267,11 +283,7 @@ export default async function DashboardPage() {
     "Kupexsan";
 
   const memberName = profile.full_name?.trim() || "KUPEXSA Member";
-  const classDisplay = profile.graduation_year
-    ? `Class of ${profile.graduation_year}`
-    : profile.entry_year
-      ? `Entry Year ${profile.entry_year}`
-      : "Not provided";
+  const classDisplay = badgeYear ? `Class of ${badgeYear}` : "Class of........";
 
   const [verifiedMembersResult, countriesResult, chaptersResult, eventsResult] =
     await Promise.all([

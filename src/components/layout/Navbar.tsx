@@ -117,10 +117,6 @@ export default function Navbar() {
     };
   }, []);
 
-  useEffect(() => {
-    setMobileMenuOpen(false);
-  }, [pathname]);
-
   async function handleLogout() {
     const supabase = createClient();
 
