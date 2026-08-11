@@ -1,5 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 
+export type MemberStatus =
+  | "pending"
+  | "verified"
+  | "suspended"
+  | "inactive";
+
 export type DirectoryMember = {
   id: string;
   memberId: string;
@@ -12,6 +18,7 @@ export type DirectoryMember = {
   company: string | null;
   biography: string | null;
   profilePhoto: string | null;
+  status: MemberStatus;
   badge: {
     id: string;
     displayName: string;
@@ -70,6 +77,7 @@ type RawDirectoryMember = {
   company: string | null;
   biography: string | null;
   profile_photo: string | null;
+  status: MemberStatus;
   badge: RelationValue<{
     id: string;
     display_name: string;
@@ -143,6 +151,7 @@ export async function getDirectoryMembers(): Promise<DirectoryData> {
           company,
           biography,
           profile_photo,
+          status,
           badge:badges (
             id,
             display_name,
@@ -165,7 +174,6 @@ export async function getDirectoryMembers(): Promise<DirectoryData> {
           )
         `
       )
-      .eq("status", "verified")
       .order("full_name", { ascending: true }),
     supabase
       .from("countries")
@@ -225,6 +233,7 @@ export async function getDirectoryMembers(): Promise<DirectoryData> {
         company: member.company,
         biography: member.biography,
         profilePhoto: member.profile_photo,
+        status: member.status,
         badge: badge
           ? {
               id: badge.id,

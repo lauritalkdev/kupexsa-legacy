@@ -5,12 +5,6 @@ import { getDirectoryMembers } from "@/features/members/get-directory-members";
 type DirectoryPageProps = {
   searchParams: Promise<{
     q?: string;
-    country?: string;
-    chapter?: string;
-    occupation?: string;
-    badge?: string;
-    entryYear?: string;
-    graduationYear?: string;
   }>;
 };
 
@@ -29,6 +23,33 @@ function memberInitials(fullName: string) {
   );
 }
 
+
+function memberStatusLabel(status: string) {
+  switch (status) {
+    case "verified":
+      return "Verified";
+    case "suspended":
+      return "Suspended";
+    case "inactive":
+      return "Inactive";
+    default:
+      return "Pending Approval";
+  }
+}
+
+function memberStatusClasses(status: string) {
+  switch (status) {
+    case "verified":
+      return "border-green-200 bg-green-50 text-green-700";
+    case "suspended":
+      return "border-red-200 bg-red-50 text-red-700";
+    case "inactive":
+      return "border-gray-200 bg-gray-100 text-gray-600";
+    default:
+      return "border-yellow-200 bg-yellow-50 text-yellow-800";
+  }
+}
+
 export default async function DirectoryPage({
   searchParams,
 }: DirectoryPageProps) {
@@ -36,22 +57,7 @@ export default async function DirectoryPage({
   const directory = await getDirectoryMembers();
 
   const query = normalize(params.q);
-  const selectedCountry = params.country ?? "";
-  const selectedChapter = params.chapter ?? "";
-  const selectedOccupation = params.occupation ?? "";
-  const selectedBadge = params.badge ?? "";
-  const selectedEntryYear = params.entryYear?.trim() ?? "";
-  const selectedGraduationYear = params.graduationYear?.trim() ?? "";
-
-  const hasActiveSearch = Boolean(
-    query ||
-      selectedCountry ||
-      selectedChapter ||
-      selectedOccupation ||
-      selectedBadge ||
-      selectedEntryYear ||
-      selectedGraduationYear
-  );
+  const hasActiveSearch = Boolean(query);
 
   const filteredMembers = directory.members.filter((member) => {
     const searchableValues = [
@@ -64,43 +70,15 @@ export default async function DirectoryPage({
       member.entryYear?.toString(),
       member.graduationYear?.toString(),
       member.badge?.displayName,
+      member.badge?.badgeYear?.toString(),
       member.chapter?.name,
       member.country?.name,
       member.company,
     ];
 
-    const matchesUniversalSearch =
-      !query ||
-      searchableValues.some((value) => normalize(value).includes(query));
-
-    const matchesCountry =
-      !selectedCountry || member.country?.id === selectedCountry;
-
-    const matchesChapter =
-      !selectedChapter || member.chapter?.id === selectedChapter;
-
-    const matchesOccupation =
-      !selectedOccupation || member.occupation?.id === selectedOccupation;
-
-    const matchesBadge =
-      !selectedBadge || member.badge?.id === selectedBadge;
-
-    const matchesEntryYear =
-      !selectedEntryYear ||
-      member.entryYear?.toString() === selectedEntryYear;
-
-    const matchesGraduationYear =
-      !selectedGraduationYear ||
-      member.graduationYear?.toString() === selectedGraduationYear;
-
     return (
-      matchesUniversalSearch &&
-      matchesCountry &&
-      matchesChapter &&
-      matchesOccupation &&
-      matchesBadge &&
-      matchesEntryYear &&
-      matchesGraduationYear
+      !query ||
+      searchableValues.some((value) => normalize(value).includes(query))
     );
   });
 
@@ -123,7 +101,7 @@ export default async function DirectoryPage({
           </h1>
 
           <p className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-blue-100">
-            Search verified members by name, preferred name, KUPEXSA member ID,
+            Search registered members by name, preferred name, KUPEXSA member ID,
             phone, WhatsApp, occupation, school years, badge, chapter or country.
           </p>
 
@@ -200,7 +178,7 @@ export default async function DirectoryPage({
         {directory.canAccessDirectory && (
           <>
             <form
-              action="/directory"
+              action="/directory#member-results"
               method="get"
               className="mt-12 rounded-3xl border border-gray-200 bg-gray-50 p-6 shadow-sm sm:p-8"
             >
@@ -217,152 +195,14 @@ export default async function DirectoryPage({
                   name="q"
                   type="search"
                   defaultValue={params.q ?? ""}
-                  placeholder="Name, nickname, KPX number, phone, WhatsApp or profession"
+                  placeholder="Name, nickname, KPX number, phone, WhatsApp, occupation, badge or year"
                   className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3.5 outline-none transition focus:border-blue-700 focus:ring-2 focus:ring-blue-100"
                 />
 
                 <p className="mt-2 text-xs leading-5 text-gray-500">
-                  Phone and WhatsApp numbers are searchable for identification,
-                  but they are not displayed in the results.
+                  Search with any detail you know. Phone and WhatsApp numbers
+                  can locate a member but are not displayed in the results.
                 </p>
-              </div>
-
-              <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                <div>
-                  <label
-                    htmlFor="country"
-                    className="mb-2 block text-sm font-semibold text-blue-950"
-                  >
-                    Country
-                  </label>
-
-                  <select
-                    id="country"
-                    name="country"
-                    defaultValue={selectedCountry}
-                    className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 outline-none transition focus:border-blue-700 focus:ring-2 focus:ring-blue-100"
-                  >
-                    <option value="">All countries</option>
-
-                    {directory.countries.map((country) => (
-                      <option key={country.id} value={country.id}>
-                        {country.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="chapter"
-                    className="mb-2 block text-sm font-semibold text-blue-950"
-                  >
-                    Chapter
-                  </label>
-
-                  <select
-                    id="chapter"
-                    name="chapter"
-                    defaultValue={selectedChapter}
-                    className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 outline-none transition focus:border-blue-700 focus:ring-2 focus:ring-blue-100"
-                  >
-                    <option value="">All chapters</option>
-
-                    {directory.chapters.map((chapter) => (
-                      <option key={chapter.id} value={chapter.id}>
-                        {chapter.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="occupation"
-                    className="mb-2 block text-sm font-semibold text-blue-950"
-                  >
-                    Occupation
-                  </label>
-
-                  <select
-                    id="occupation"
-                    name="occupation"
-                    defaultValue={selectedOccupation}
-                    className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 outline-none transition focus:border-blue-700 focus:ring-2 focus:ring-blue-100"
-                  >
-                    <option value="">All occupations</option>
-
-                    {directory.occupations.map((occupation) => (
-                      <option key={occupation.id} value={occupation.id}>
-                        {occupation.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="badge"
-                    className="mb-2 block text-sm font-semibold text-blue-950"
-                  >
-                    Badge / Class
-                  </label>
-
-                  <select
-                    id="badge"
-                    name="badge"
-                    defaultValue={selectedBadge}
-                    className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 outline-none transition focus:border-blue-700 focus:ring-2 focus:ring-blue-100"
-                  >
-                    <option value="">All badges</option>
-
-                    {directory.badges.map((badge) => (
-                      <option key={badge.id} value={badge.id}>
-                        {badge.displayName}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="entry-year"
-                    className="mb-2 block text-sm font-semibold text-blue-950"
-                  >
-                    Entry Year
-                  </label>
-
-                  <input
-                    id="entry-year"
-                    name="entryYear"
-                    type="number"
-                    min="1963"
-                    max="2100"
-                    defaultValue={selectedEntryYear}
-                    placeholder="Example: 2005"
-                    className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 outline-none transition focus:border-blue-700 focus:ring-2 focus:ring-blue-100"
-                  />
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="graduation-year"
-                    className="mb-2 block text-sm font-semibold text-blue-950"
-                  >
-                    Graduation Year
-                  </label>
-
-                  <input
-                    id="graduation-year"
-                    name="graduationYear"
-                    type="number"
-                    min="1963"
-                    max="2100"
-                    defaultValue={selectedGraduationYear}
-                    placeholder="Example: 2010"
-                    className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 outline-none transition focus:border-blue-700 focus:ring-2 focus:ring-blue-100"
-                  />
-                </div>
               </div>
 
               <div className="mt-7 flex flex-wrap gap-4">
@@ -409,7 +249,7 @@ export default async function DirectoryPage({
                 </h2>
 
                 <p className="mt-5 leading-7 text-gray-600">
-                  Showing {filteredMembers.length} verified{" "}
+                  Showing {filteredMembers.length} registered{" "}
                   {filteredMembers.length === 1 ? "member" : "members"}
                   {hasActiveSearch ? " matching your search." : "."}
                 </p>
@@ -420,7 +260,7 @@ export default async function DirectoryPage({
                   href="/directory#member-results"
                   className="font-semibold text-blue-900 transition hover:text-yellow-700"
                 >
-                  View all verified members →
+                  View all registered members →
                 </Link>
               )}
             </div>
@@ -436,8 +276,7 @@ export default async function DirectoryPage({
                 </h3>
 
                 <p className="mx-auto mt-3 max-w-xl leading-7 text-gray-600">
-                  Try a different name, KUPEXSA number, phone fragment,
-                  occupation, year or filter combination.
+                  Try a different name, KUPEXSA number, phone fragment, occupation, badge or year.
                 </p>
 
                 <Link
@@ -469,9 +308,19 @@ export default async function DirectoryPage({
                     </div>
 
                     <div className="p-7">
-                      <p className="text-sm font-semibold text-yellow-700">
-                        {member.memberId}
-                      </p>
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <p className="text-sm font-semibold text-yellow-700">
+                          {member.memberId}
+                        </p>
+
+                        <span
+                          className={`inline-flex rounded-full border px-3 py-1 text-xs font-bold ${memberStatusClasses(
+                            member.status
+                          )}`}
+                        >
+                          {memberStatusLabel(member.status)}
+                        </span>
+                      </div>
 
                       <h3 className="mt-2 text-2xl font-bold text-blue-950">
                         {member.fullName}
