@@ -20,6 +20,8 @@ type ProfileRow = {
   country_id: string | null;
   chapter_id: string | null;
   occupation_id: string | null;
+  custom_chapter: string | null;
+  custom_occupation: string | null;
   company: string | null;
   marital_status:
     | "single"
@@ -98,6 +100,8 @@ export default async function MemberProfilePage() {
           country_id,
           chapter_id,
           occupation_id,
+          custom_chapter,
+          custom_occupation,
           company,
           marital_status,
           biography,
