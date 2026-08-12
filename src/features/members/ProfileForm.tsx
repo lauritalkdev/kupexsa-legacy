@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { FormEvent, useMemo, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/client";
@@ -102,6 +102,96 @@ function statusLabel(status: Profile["status"]) {
   }
 }
 
+
+const MAX_SOURCE_PHOTO_BYTES = 12 * 1024 * 1024;
+const MAX_UPLOAD_PHOTO_BYTES = 200 * 1024;
+const PROFILE_PHOTO_BUCKET = "profile-photos";
+const ACCEPTED_PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
+function extensionForMimeType(type: string) {
+  if (type === "image/png") return "png";
+  if (type === "image/webp") return "webp";
+  return "jpg";
+}
+
+function loadBrowserImage(file: File): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const image = new window.Image();
+    image.onload = () => {
+      URL.revokeObjectURL(url);
+      resolve(image);
+    };
+    image.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("The selected image could not be processed."));
+    };
+    image.src = url;
+  });
+}
+
+function canvasToBlob(
+  canvas: HTMLCanvasElement,
+  type: string,
+  quality: number
+): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (blob) resolve(blob);
+      else reject(new Error("The selected image could not be compressed."));
+    }, type, quality);
+  });
+}
+
+async function compressProfilePhoto(file: File): Promise<File> {
+  if (file.size <= MAX_UPLOAD_PHOTO_BYTES) return file;
+
+  const image = await loadBrowserImage(file);
+  let width = image.naturalWidth;
+  let height = image.naturalHeight;
+
+  if (Math.max(width, height) > 1200) {
+    const scale = 1200 / Math.max(width, height);
+    width = Math.max(1, Math.round(width * scale));
+    height = Math.max(1, Math.round(height * scale));
+  }
+
+  let quality = 0.86;
+
+  for (let attempt = 0; attempt < 18; attempt += 1) {
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const context = canvas.getContext("2d");
+
+    if (!context) {
+      throw new Error("Your browser could not prepare the profile photo.");
+    }
+
+    context.drawImage(image, 0, 0, width, height);
+    const blob = await canvasToBlob(canvas, "image/webp", quality);
+
+    if (blob.size <= MAX_UPLOAD_PHOTO_BYTES) {
+      return new File([blob], "profile.webp", {
+        type: "image/webp",
+        lastModified: Date.now(),
+      });
+    }
+
+    if (quality > 0.48) {
+      quality -= 0.08;
+    } else {
+      width = Math.max(320, Math.round(width * 0.85));
+      height = Math.max(320, Math.round(height * 0.85));
+      quality = 0.72;
+    }
+  }
+
+  throw new Error(
+    "We could not reduce this image below 200 KB. Please choose another photo."
+  );
+}
+
 export default function ProfileForm({
   profile,
   badges,
@@ -144,6 +234,11 @@ export default function ProfileForm({
     MaritalStatus | ""
   >(profile.marital_status ?? "");
   const [biography, setBiography] = useState(profile.biography ?? "");
+  const [profilePhoto, setProfilePhoto] = useState(profile.profile_photo ?? "");
+  const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState(profile.profile_photo ?? "");
+  const [photoProcessing, setPhotoProcessing] = useState(false);
+  const [photoNote, setPhotoNote] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -199,6 +294,108 @@ export default function ProfileForm({
   const completion = Math.round(
     (completedFields / profileFields.length) * 100
   );
+
+  useEffect(() => {
+    return () => {
+      if (photoPreview.startsWith("blob:")) URL.revokeObjectURL(photoPreview);
+    };
+  }, [photoPreview]);
+
+  async function handlePhotoChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    setMessage("");
+    setMessageType("");
+    setPhotoNote("");
+
+    if (!file) return;
+
+    if (!ACCEPTED_PHOTO_TYPES.includes(file.type)) {
+      setMessage("Please choose a JPEG, PNG or WebP image.");
+      setMessageType("error");
+      event.target.value = "";
+      return;
+    }
+
+    if (file.size > MAX_SOURCE_PHOTO_BYTES) {
+      setMessage("Profile photos must not be larger than 12 MB.");
+      setMessageType("error");
+      event.target.value = "";
+      return;
+    }
+
+    setPhotoProcessing(true);
+
+    try {
+      const prepared = await compressProfilePhoto(file);
+      if (photoPreview.startsWith("blob:")) URL.revokeObjectURL(photoPreview);
+
+      setSelectedPhoto(prepared);
+      setPhotoPreview(URL.createObjectURL(prepared));
+
+      setPhotoNote(
+        file.size <= MAX_UPLOAD_PHOTO_BYTES
+          ? `Ready to upload without compression (${Math.ceil(file.size / 1024)} KB).`
+          : `Compressed from ${(file.size / (1024 * 1024)).toFixed(1)} MB to ${Math.ceil(prepared.size / 1024)} KB.`
+      );
+    } catch (error) {
+      setSelectedPhoto(null);
+      setPhotoPreview(profilePhoto);
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "The selected profile photo could not be prepared."
+      );
+      setMessageType("error");
+      event.target.value = "";
+    } finally {
+      setPhotoProcessing(false);
+    }
+  }
+
+  async function uploadSelectedPhoto() {
+    if (!selectedPhoto) return profilePhoto || null;
+
+    const supabase = createClient();
+    const extension = extensionForMimeType(selectedPhoto.type);
+    const objectPath = `${profile.id}/profile.${extension}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from(PROFILE_PHOTO_BUCKET)
+      .upload(objectPath, selectedPhoto, {
+        cacheControl: "3600",
+        contentType: selectedPhoto.type,
+        upsert: true,
+      });
+
+    if (uploadError) throw uploadError;
+
+    const { data } = supabase.storage
+      .from(PROFILE_PHOTO_BUCKET)
+      .getPublicUrl(objectPath);
+
+    const newUrl = `${data.publicUrl}?v=${Date.now()}`;
+
+    if (profilePhoto) {
+      try {
+        const oldUrl = new URL(profilePhoto);
+        const marker = `/storage/v1/object/public/${PROFILE_PHOTO_BUCKET}/`;
+        const index = oldUrl.pathname.indexOf(marker);
+        if (index >= 0) {
+          const oldPath = decodeURIComponent(
+            oldUrl.pathname.slice(index + marker.length)
+          );
+          if (oldPath && oldPath !== objectPath) {
+            await supabase.storage.from(PROFILE_PHOTO_BUCKET).remove([oldPath]);
+          }
+        }
+      } catch {
+        // An older external URL should not block a new upload.
+      }
+    }
+
+    setProfilePhoto(newUrl);
+    return newUrl;
+  }
 
   function handleCountryChange(value: string) {
     setCountryId(value);
@@ -267,6 +464,7 @@ export default function ProfileForm({
 
     try {
       const supabase = createClient();
+      const uploadedProfilePhoto = await uploadSelectedPhoto();
 
       const { error } = await supabase
         .from("profiles")
@@ -292,6 +490,7 @@ export default function ProfileForm({
           company: optionalValue(company),
           marital_status: maritalStatus || null,
           biography: optionalValue(biography),
+          profile_photo: uploadedProfilePhoto,
         })
         .eq("id", profile.id);
 
@@ -306,6 +505,8 @@ export default function ProfileForm({
         },
       });
 
+      setSelectedPhoto(null);
+      setPhotoNote("");
       setMessage("Your KUPEXSA profile has been updated successfully.");
       setMessageType("success");
       router.refresh();
@@ -327,15 +528,26 @@ export default function ProfileForm({
       <aside className="space-y-6">
         <section className="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm">
           <div className="flex min-h-64 items-center justify-center bg-gradient-to-br from-blue-950 via-blue-900 to-blue-800 p-8">
-            {profile.profile_photo ? (
+            {photoPreview ? (
               <div className="relative h-40 w-40 overflow-hidden rounded-full border-4 border-yellow-400 shadow-xl">
-                <Image
-                  src={profile.profile_photo}
-                  alt={profile.full_name}
-                  fill
-                  className="object-cover"
-                  sizes="160px"
-                />
+                {photoPreview.startsWith("blob:") ? (
+  <>
+    {/* eslint-disable-next-line @next/next/no-img-element */}
+    <img
+      src={photoPreview}
+      alt={`${profile.full_name} profile preview`}
+      className="h-full w-full object-cover"
+    />
+  </>
+) : (
+                  <Image
+                    src={photoPreview}
+                    alt={profile.full_name}
+                    fill
+                    className="object-cover"
+                    sizes="160px"
+                  />
+                )}
               </div>
             ) : (
               <div className="flex h-40 w-40 items-center justify-center rounded-full border-4 border-yellow-400/50 bg-white/10 text-4xl font-bold text-yellow-300">
@@ -362,10 +574,44 @@ export default function ProfileForm({
               {statusLabel(profile.status)}
             </span>
 
-            <p className="mt-5 text-sm leading-6 text-gray-600">
-              Profile-photo upload will be connected after the KUPEXSA
-              Supabase Storage setup is inspected and secured.
-            </p>
+            <div className="mt-6">
+              <label
+                htmlFor="profile-photo"
+                className="inline-flex cursor-pointer items-center justify-center rounded-xl bg-yellow-500 px-5 py-3 text-sm font-bold text-blue-950 transition hover:bg-yellow-400"
+              >
+                {photoProcessing
+                  ? "Preparing Photo..."
+                  : profilePhoto
+                    ? "Change Profile Photo"
+                    : "Upload Profile Photo"}
+              </label>
+
+              <input
+                id="profile-photo"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={handlePhotoChange}
+                disabled={loading || photoProcessing}
+                className="sr-only"
+              />
+
+              <p className="mt-3 text-sm leading-6 text-gray-600">
+                Choose a JPEG, PNG or WebP image up to 12 MB. Photos above
+                200 KB are automatically resized and compressed before upload.
+              </p>
+
+              {photoNote && (
+                <p className="mt-2 text-sm font-semibold text-green-700">
+                  {photoNote}
+                </p>
+              )}
+
+              {selectedPhoto && (
+                <p className="mt-2 text-xs text-gray-500">
+                  Your new photo will be uploaded when you save your profile.
+                </p>
+              )}
+            </div>
           </div>
         </section>
 
@@ -889,10 +1135,14 @@ export default function ProfileForm({
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || photoProcessing}
             className="rounded-xl bg-blue-950 px-7 py-3 font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {loading ? "Saving Profile..." : "Save Profile"}
+            {photoProcessing
+              ? "Preparing Photo..."
+              : loading
+                ? "Saving Profile..."
+                : "Save Profile"}
           </button>
         </div>
       </form>
