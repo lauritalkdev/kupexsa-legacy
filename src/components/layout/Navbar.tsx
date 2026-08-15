@@ -52,6 +52,7 @@ export default function Navbar() {
 
   const [loggedIn, setLoggedIn] = useState(false);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [isChapterAdmin, setIsChapterAdmin] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -68,6 +69,7 @@ export default function Navbar() {
 
       if (!user) {
         setIsSuperAdmin(false);
+        setIsChapterAdmin(false);
         return;
       }
 
@@ -85,12 +87,14 @@ export default function Navbar() {
 
       if (error || !profile) {
         setIsSuperAdmin(false);
+        setIsChapterAdmin(false);
         return;
       }
 
-      setIsSuperAdmin(
-        getRoleName(profile.role as RoleRelation) === "Super Admin"
-      );
+      const roleName = getRoleName(profile.role as RoleRelation);
+
+      setIsSuperAdmin(roleName === "Super Admin");
+      setIsChapterAdmin(roleName === "Chapter Admin");
     }
 
     loadSessionAndRole();
@@ -104,6 +108,7 @@ export default function Navbar() {
 
       if (!user) {
         setIsSuperAdmin(false);
+        setIsChapterAdmin(false);
         return;
       }
 
@@ -124,6 +129,7 @@ export default function Navbar() {
 
     setLoggedIn(false);
     setIsSuperAdmin(false);
+    setIsChapterAdmin(false);
     setMobileMenuOpen(false);
 
     router.push("/");
@@ -199,6 +205,19 @@ export default function Navbar() {
                       }`}
                     >
                       Super Admin
+                    </Link>
+                  )}
+
+                  {isChapterAdmin && (
+                    <Link
+                      href="/chapter-admin"
+                      className={`rounded-lg px-4 py-2.5 text-sm font-bold transition ${
+                        pathname.startsWith("/chapter-admin")
+                          ? "bg-yellow-500 text-blue-950"
+                          : "border border-yellow-500 text-yellow-700 hover:bg-yellow-500 hover:text-blue-950"
+                      }`}
+                    >
+                      Chapter Admin
                     </Link>
                   )}
 
@@ -318,6 +337,19 @@ export default function Navbar() {
                       }`}
                     >
                       Super Admin
+                    </Link>
+                  )}
+
+                  {isChapterAdmin && (
+                    <Link
+                      href="/chapter-admin"
+                      className={`rounded-xl px-4 py-3 text-base font-bold transition ${
+                        pathname.startsWith("/chapter-admin")
+                          ? "bg-yellow-500 text-blue-950"
+                          : "border border-yellow-500 text-yellow-700 hover:bg-yellow-500 hover:text-blue-950"
+                      }`}
+                    >
+                      Chapter Admin
                     </Link>
                   )}
 
