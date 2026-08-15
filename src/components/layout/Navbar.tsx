@@ -222,6 +222,17 @@ export default function Navbar() {
                   )}
 
                   <Link
+                    href="/attendance"
+                    className={`rounded-lg px-4 py-2.5 text-sm font-bold transition ${
+                      pathname.startsWith("/attendance")
+                        ? "bg-blue-950 text-white"
+                        : "border border-blue-950 text-blue-950 hover:bg-blue-950 hover:text-white"
+                    }`}
+                  >
+                    Attendance
+                  </Link>
+
+                  <Link
                     href="/dashboard"
                     className="rounded-lg border border-blue-950 px-4 py-2.5 text-sm font-bold text-blue-950 transition hover:bg-blue-950 hover:text-white"
                   >
@@ -352,6 +363,17 @@ export default function Navbar() {
                       Chapter Admin
                     </Link>
                   )}
+
+                  <Link
+                    href="/attendance"
+                    className={`rounded-xl px-4 py-3 text-base font-bold transition ${
+                      pathname.startsWith("/attendance")
+                        ? "bg-blue-950 text-white"
+                        : "border border-blue-950 text-blue-950 hover:bg-blue-950 hover:text-white"
+                    }`}
+                  >
+                    Attendance
+                  </Link>
 
                   <Link
                     href="/dashboard"
