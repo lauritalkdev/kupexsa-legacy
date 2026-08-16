@@ -63,23 +63,53 @@ function formatDateTime(value: string) {
   }).format(new Date(value));
 }
 
-function getCurrentPosition(): Promise<GeolocationPosition> {
-  return new Promise((resolve, reject) => {
-    if (!navigator.geolocation) {
-      reject(
-        new Error(
-          "Location services are not supported by this browser or device."
-        )
-      );
-      return;
-    }
+async function getCurrentPosition(): Promise<GeolocationPosition> {
+  if (!navigator.geolocation) {
+    throw new Error(
+      "Location services are not supported by this browser or device."
+    );
+  }
 
-    navigator.geolocation.getCurrentPosition(resolve, reject, {
-      enableHighAccuracy: true,
-      timeout: 20000,
-      maximumAge: 0,
-    });
-  });
+  const readings: GeolocationPosition[] = [];
+  let lastError: GeolocationPositionError | null = null;
+
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      const position = await new Promise<GeolocationPosition>(
+        (resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, {
+            enableHighAccuracy: true,
+            timeout: 12000,
+            maximumAge: 0,
+          });
+        }
+      );
+
+      readings.push(position);
+
+      if (position.coords.accuracy <= 25) {
+        break;
+      }
+
+      if (attempt < 2) {
+        await new Promise((resolve) => setTimeout(resolve, 1200));
+      }
+    } catch (error) {
+      lastError = error as GeolocationPositionError;
+
+      if (attempt < 2) {
+        await new Promise((resolve) => setTimeout(resolve, 1200));
+      }
+    }
+  }
+
+  if (readings.length === 0) {
+    throw lastError ?? new Error("Location could not be determined.");
+  }
+
+  return readings.reduce((best, current) =>
+    current.coords.accuracy < best.coords.accuracy ? current : best
+  );
 }
 
 function locationErrorMessage(error: unknown) {
@@ -319,7 +349,7 @@ export default function AttendancePage() {
 
       setMeetingTitle("");
       setMessage(
-        "Attendance has started successfully. Members within 70 metres can mark themselves present."
+        "Attendance has started successfully. Members within 110 metres can mark themselves present."
       );
       setMessageType("success");
 
@@ -377,7 +407,7 @@ export default function AttendancePage() {
     );
 
     if (
-      message.includes("within 70 metres") ||
+      message.includes("permitted attendance area") ||
       message.includes("already marked attendance") ||
       message.includes("unavailable or already closed")
     ) {
@@ -519,7 +549,7 @@ export default function AttendancePage() {
               <p className="mt-3 max-w-3xl leading-7 text-gray-600">
                 Enter the meeting title. When you start attendance, your
                 current GPS location becomes the meeting point and the system
-                automatically uses a 70-metre attendance radius.
+                automatically uses a 110-metre attendance radius.
               </p>
 
               <form
@@ -610,7 +640,7 @@ export default function AttendancePage() {
                         </span>
 
                         <span className="text-sm font-semibold text-gray-500">
-                          {session.attendance_radius_meters ?? 70} m radius
+                          {session.attendance_radius_meters ?? 110} m radius
                         </span>
                       </div>
 
@@ -630,16 +660,35 @@ export default function AttendancePage() {
                         </p>
                       </div>
 
-                      <button
-                        type="button"
-                        onClick={() => handleCloseAttendance(session)}
-                        disabled={closingId === session.id}
-                        className="mt-6 rounded-xl bg-red-700 px-5 py-3 text-sm font-bold text-white transition hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-60"
-                      >
-                        {closingId === session.id
-                          ? "Closing..."
-                          : "Close Attendance"}
-                      </button>
+                      <div className="mt-6 flex flex-wrap gap-3">
+  {checkedInEventIds.has(session.id) ? (
+    <div className="rounded-xl border border-green-200 bg-green-50 px-5 py-3 text-sm font-bold text-green-700">
+      ✓ Present — attendance recorded
+    </div>
+  ) : (
+    <button
+      type="button"
+      onClick={() => handleMarkPresent(session)}
+      disabled={checkingInId === session.id}
+      className="rounded-xl bg-green-700 px-5 py-3 text-sm font-bold text-white transition hover:bg-green-600 disabled:cursor-not-allowed disabled:opacity-60"
+    >
+      {checkingInId === session.id
+        ? "Checking Location..."
+        : "Mark Myself Present"}
+    </button>
+  )}
+
+  <button
+    type="button"
+    onClick={() => handleCloseAttendance(session)}
+    disabled={closingId === session.id}
+    className="rounded-xl bg-red-700 px-5 py-3 text-sm font-bold text-white transition hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-60"
+  >
+    {closingId === session.id
+      ? "Closing..."
+      : "Close Attendance"}
+  </button>
+</div>
                     </article>
                   ))}
                 </div>
@@ -818,7 +867,7 @@ export default function AttendancePage() {
                           ACTIVE
                         </span>
                         <span className="text-sm font-semibold text-gray-500">
-                          {session.attendance_radius_meters ?? 70} m radius
+                          {session.attendance_radius_meters ?? 110} m radius
                         </span>
                       </div>
 
