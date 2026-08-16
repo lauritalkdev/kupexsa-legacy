@@ -83,14 +83,29 @@ function getCurrentPosition(): Promise<GeolocationPosition> {
 }
 
 function locationErrorMessage(error: unknown) {
-  if (error instanceof GeolocationPositionError) {
-    switch (error.code) {
-      case error.PERMISSION_DENIED:
-        return "Location permission was denied. Please allow location access and try again.";
-      case error.POSITION_UNAVAILABLE:
-        return "Your current location could not be determined. Please ensure GPS/location services are turned on.";
-      case error.TIMEOUT:
-        return "Location detection took too long. Please try again in an area with a stronger GPS signal.";
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error
+  ) {
+    const geoError = error as GeolocationPositionError;
+
+    if (geoError.code === 1) {
+      return `Location permission denied. Please allow Location for this website and try again. Browser message: ${
+        geoError.message || "Permission denied"
+      }`;
+    }
+
+    if (geoError.code === 2) {
+      return `Location unavailable. Your device/browser could not obtain GPS coordinates. Turn on device Location/GPS, ensure this website has Location permission, then try again. Browser message: ${
+        geoError.message || "Position unavailable"
+      }`;
+    }
+
+    if (geoError.code === 3) {
+      return `Location request timed out. Keep Location/GPS enabled and try again, preferably with Wi-Fi or mobile data active. Browser message: ${
+        geoError.message || "Timeout"
+      }`;
     }
   }
 
@@ -98,7 +113,7 @@ function locationErrorMessage(error: unknown) {
     return error.message;
   }
 
-  return "Your current location could not be determined.";
+  return "Location could not be determined. Please check your device Location/GPS and browser permissions.";
 }
 
 export default function AttendancePage() {
@@ -296,9 +311,11 @@ export default function AttendancePage() {
         admin_longitude: position.coords.longitude,
       });
 
-      if (error) {
-        throw error;
-      }
+   if (error) {
+  setMessage(`Attendance could not be started: ${error.message}`);
+  setMessageType("error");
+  return;
+}
 
       setMeetingTitle("");
       setMessage(
@@ -349,12 +366,34 @@ export default function AttendancePage() {
         next.add(session.id);
         return next;
       });
-    } catch (error) {
+} catch (error: unknown) {
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "message" in error
+  ) {
+    const message = String(
+      (error as { message?: unknown }).message ?? ""
+    );
+
+    if (
+      message.includes("within 70 metres") ||
+      message.includes("already marked attendance") ||
+      message.includes("unavailable or already closed")
+    ) {
+      setMessage(message);
+      setMessageType("error");
+    } else {
       setMessage(locationErrorMessage(error));
       setMessageType("error");
-    } finally {
-      setCheckingInId(null);
     }
+  } else {
+    setMessage(locationErrorMessage(error));
+    setMessageType("error");
+  }
+} finally {
+  setCheckingInId(null);
+}
   }
 
   async function handleCloseAttendance(session: ActiveAttendanceSession) {
