@@ -99,20 +99,27 @@ export default async function AdminMembersPage({ searchParams }: Props) {
           <p className="mt-5 max-w-3xl text-blue-100">Search members, approve registrations, manage membership status and assign Chapter Admin responsibilities.</p>
 
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link
-              href="/admin/chapters"
-              className="rounded-xl bg-yellow-500 px-5 py-3 text-sm font-bold text-blue-950 transition hover:bg-yellow-400"
-            >
-              Chapter Member Lists
-            </Link>
+  <Link
+    href="/admin/chapters"
+    className="rounded-xl bg-yellow-500 px-5 py-3 text-sm font-bold text-blue-950 transition hover:bg-yellow-400"
+  >
+    Chapter Member Lists
+  </Link>
 
-            <Link
-              href="/admin/activity"
-              className="rounded-xl border border-white/60 px-5 py-3 text-sm font-bold text-white transition hover:bg-white hover:text-blue-950"
-            >
-              Admin Activity Log
-            </Link>
-          </div>
+  <Link
+    href="/admin/announcements"
+    className="rounded-xl bg-white px-5 py-3 text-sm font-bold text-blue-950 transition hover:bg-blue-100"
+  >
+    Email Announcements
+  </Link>
+
+  <Link
+    href="/admin/activity"
+    className="rounded-xl border border-white/60 px-5 py-3 text-sm font-bold text-white transition hover:bg-white hover:text-blue-950"
+  >
+    Admin Activity Log
+  </Link>
+</div>
         </div>
       </section>
 

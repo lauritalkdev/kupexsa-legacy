@@ -132,12 +132,26 @@ export default function RegisterForm() {
       });
 
       if (error) {
-        setMessage(error.message);
-        setIsError(true);
-        return;
-      }
+  setMessage(error.message);
+  setIsError(true);
+  return;
+}
 
-      setRegistrationComplete(true);
+try {
+  const emailResponse = await fetch("/api/registration-email", {
+    method: "POST",
+  });
+
+  if (!emailResponse.ok) {
+    console.error(
+      "Account created successfully, but the welcome email could not be sent."
+    );
+  }
+} catch (emailError) {
+  console.error("Registration email error:", emailError);
+}
+
+setRegistrationComplete(true);
     } catch (error) {
       console.error("Registration error:", error);
 
@@ -180,8 +194,8 @@ export default function RegisterForm() {
         </p>
 
         <p className="mt-2 text-sm text-gray-600">
-          You will be able to access your member account after it has been
-          approved.
+          You can now access your member account and complete your account profile
+          from the dashboard while waiting for your account approval.
         </p>
 
         <Link
