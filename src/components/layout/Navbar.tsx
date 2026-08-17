@@ -321,9 +321,10 @@ export default function Navbar() {
 
                 return (
                   <Link
-                    key={link.href}
-                    href={link.href}
-                    className={`rounded-xl px-4 py-3 text-base font-semibold transition ${
+  key={link.href}
+  href={link.href}
+  onClick={() => setMobileMenuOpen(false)}
+  className={`rounded-xl px-4 py-3 text-base font-semibold transition ${
                       active
                         ? "bg-blue-950 text-white"
                         : "text-gray-700 hover:bg-blue-50 hover:text-blue-950"
@@ -341,6 +342,7 @@ export default function Navbar() {
                   {isSuperAdmin && (
                     <Link
                       href="/admin/members"
+                      onClick={() => setMobileMenuOpen(false)}
                       className={`rounded-xl px-4 py-3 text-base font-bold transition ${
                         pathname.startsWith("/admin")
                           ? "bg-yellow-500 text-blue-950"
@@ -354,6 +356,7 @@ export default function Navbar() {
                   {isChapterAdmin && (
                     <Link
                       href="/chapter-admin"
+                      onClick={() => setMobileMenuOpen(false)}
                       className={`rounded-xl px-4 py-3 text-base font-bold transition ${
                         pathname.startsWith("/chapter-admin")
                           ? "bg-yellow-500 text-blue-950"
@@ -366,6 +369,7 @@ export default function Navbar() {
 
                   <Link
                     href="/attendance"
+                    onClick={() => setMobileMenuOpen(false)}
                     className={`rounded-xl px-4 py-3 text-base font-bold transition ${
                       pathname.startsWith("/attendance")
                         ? "bg-blue-950 text-white"
@@ -377,6 +381,7 @@ export default function Navbar() {
 
                   <Link
                     href="/dashboard"
+                    onClick={() => setMobileMenuOpen(false)}
                     className={`rounded-xl px-4 py-3 text-base font-bold transition ${
                       pathname.startsWith("/dashboard")
                         ? "bg-blue-950 text-white"
@@ -398,6 +403,7 @@ export default function Navbar() {
                 <>
                   <Link
                     href="/login"
+                    onClick={() => setMobileMenuOpen(false)}
                     className="rounded-xl border border-blue-950 px-4 py-3 text-center text-base font-bold text-blue-950 transition hover:bg-blue-950 hover:text-white"
                   >
                     Member Login
@@ -405,6 +411,7 @@ export default function Navbar() {
 
                   <Link
                     href="/register"
+                    onClick={() => setMobileMenuOpen(false)}
                     className="rounded-xl bg-yellow-500 px-4 py-3 text-center text-base font-bold text-blue-950 transition hover:bg-yellow-400"
                   >
                     Join KUPEXSA Connect

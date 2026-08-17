@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import JubileeCountdown from "@/components/dashboard/JubileeCountdown";
 import HeritageImage from "@/components/ui/HeritageImage";
 import { SCHOOL_MOTTO } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/server";
@@ -160,12 +161,13 @@ const quickActions = [
     href: "#community-gallery",
     icon: "📷",
   },
-  {
-    title: "Account Settings",
-    description: "Manage your account, privacy and communication preferences.",
-    href: "/dashboard/settings",
-    icon: "⚙️",
-  },
+ {
+  title: "Account Settings",
+  description: "Additional account settings will be available in a future update.",
+  href: "",
+  icon: "⚙️",
+  disabled: true,
+},
 ];
 
 const announcements = [
@@ -563,29 +565,52 @@ export default async function DashboardPage() {
         </div>
 
         <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {quickActions.map((action) => (
-            <Link
-              key={action.title}
-              href={action.href}
-              className="group rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-blue-200 hover:shadow-md"
-            >
-              <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-2xl">
-                {action.icon}
-              </span>
+         {quickActions.map((action) =>
+  "disabled" in action && action.disabled ? (
+    <div
+      key={action.title}
+      className="rounded-2xl border border-gray-200 bg-gray-100 p-6 opacity-75 shadow-sm"
+    >
+      <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-gray-200 text-2xl">
+        {action.icon}
+      </span>
 
-              <h3 className="mt-5 text-xl font-bold text-blue-950">
-                {action.title}
-              </h3>
+      <h3 className="mt-5 text-xl font-bold text-blue-950">
+        {action.title}
+      </h3>
 
-              <p className="mt-2 leading-7 text-gray-600">
-                {action.description}
-              </p>
+      <p className="mt-2 leading-7 text-gray-600">
+        {action.description}
+      </p>
 
-              <p className="mt-5 text-sm font-semibold text-blue-800 transition group-hover:text-yellow-700">
-                Open section →
-              </p>
-            </Link>
-          ))}
+      <p className="mt-5 text-sm font-semibold text-gray-500">
+        Coming Soon
+      </p>
+    </div>
+  ) : (
+    <Link
+      key={action.title}
+      href={action.href}
+      className="group rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-blue-200 hover:shadow-md"
+    >
+      <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-2xl">
+        {action.icon}
+      </span>
+
+      <h3 className="mt-5 text-xl font-bold text-blue-950">
+        {action.title}
+      </h3>
+
+      <p className="mt-2 leading-7 text-gray-600">
+        {action.description}
+      </p>
+
+      <p className="mt-5 text-sm font-semibold text-blue-800 transition group-hover:text-yellow-700">
+        Open section →
+      </p>
+    </Link>
+  )
+)}
         </div>
       </section>
 
@@ -661,21 +686,23 @@ export default async function DashboardPage() {
                 2027 Jubilee Celebration
               </h2>
 
-              <div className="mt-5 space-y-2 text-sm text-gray-600">
-                <p>
-                  <span className="font-semibold text-blue-950">
-                    Date:
-                  </span>{" "}
-                  To be announced
-                </p>
+             <div className="mt-5 space-y-2 text-sm text-gray-600">
+  <p>
+    <span className="font-semibold text-blue-950">
+      Date:
+    </span>{" "}
+    29 October 2027
+  </p>
 
-                <p>
-                  <span className="font-semibold text-blue-950">
-                    Location:
-                  </span>{" "}
-                  Kumba, Cameroon
-                </p>
-              </div>
+  <p>
+    <span className="font-semibold text-blue-950">
+      Location:
+    </span>{" "}
+    Kumba, Cameroon
+  </p>
+</div>
+
+<JubileeCountdown />
 
               <p className="mt-5 leading-8 text-gray-600">
                 A landmark gathering celebrating KUPEXSA history, friendship
