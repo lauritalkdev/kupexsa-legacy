@@ -18,7 +18,7 @@ Your registration on the global KUPEXSA Connect platform has been received succe
 
 Your account is currently awaiting administrative verification, but you can already log in to your member account and complete your profile from the dashboard.
 
-Completing your KUPEXSA profile with accurate information, including your Class/Badge Year, Chapter, contact details and other relevant member information, is one of the fastest ways to help the KUPEXSA administration identify and verify your account.
+Completing your KUPEXSA profile with accurate information, including your Class/Batch Year, Chapter, contact details and other relevant member information, is one of the fastest ways to help the KUPEXSA administration identify and verify your account.
 
 Registered Email: ${email}
 Membership Status: Pending Approval
@@ -71,7 +71,7 @@ info@kupexsa.org
             <div style="margin:24px 0;padding:18px;background:#fff8e1;border-left:4px solid #D4AF37;border-radius:8px;">
               <p style="margin:0;font-size:15px;line-height:1.7;color:#333333;">
                 Completing your KUPEXSA profile with accurate information,
-                including your Class/Badge Year, Chapter, contact details and
+                including your Class/Batch Year, Chapter, contact details and
                 other relevant member information, is one of the fastest ways
                 to help the KUPEXSA administration identify and verify your account.
               </p>

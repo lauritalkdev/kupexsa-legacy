@@ -859,7 +859,7 @@ export default function ProfileForm({
               htmlFor="badge"
               className="mb-2 block text-sm font-semibold text-blue-950"
             >
-              Badge / Class
+              Batch / Class
             </label>
 
             <select

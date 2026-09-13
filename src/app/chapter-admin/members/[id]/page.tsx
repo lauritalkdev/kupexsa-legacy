@@ -322,7 +322,7 @@ export default async function ChapterMemberProfilePage({ params }: PageProps) {
 
                 <div>
                   <p className="text-sm font-semibold text-gray-500">
-                    Badge / Class
+                    Batch / Class
                   </p>
                   <p className="mt-1 font-semibold text-gray-900">
                     {member.badge_year

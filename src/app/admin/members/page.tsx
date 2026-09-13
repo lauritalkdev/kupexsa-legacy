@@ -142,7 +142,7 @@ export default async function AdminMembersPage({ searchParams }: Props) {
           </div>
 
           <form action="/admin/members" method="get" className="mt-7 flex flex-col gap-3 sm:flex-row">
-            <input type="search" name="q" defaultValue={params.q ?? ""} placeholder="Name, KPX number, phone, badge, chapter, status..." className="min-w-0 flex-1 rounded-xl border border-gray-300 px-4 py-3" />
+            <input type="search" name="q" defaultValue={params.q ?? ""} placeholder="Name, KPX number, phone, batch, chapter, status..." className="min-w-0 flex-1 rounded-xl border border-gray-300 px-4 py-3" />
             <button type="submit" className="rounded-xl bg-blue-950 px-6 py-3 font-bold text-white">Search</button>
             {query && <Link href="/admin/members" className="rounded-xl border border-blue-950 px-6 py-3 text-center font-bold text-blue-950">Clear</Link>}
           </form>

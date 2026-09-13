@@ -236,7 +236,7 @@ const assignedChapterName = Array.isArray(chapterRelation)
 
             <div className="mt-10 rounded-3xl bg-white p-6 shadow-sm sm:p-8">
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-yellow-700">
-                Badge Statistics
+                Batch Statistics
               </p>
 
               <h2 className="mt-3 text-3xl font-bold text-blue-950">
@@ -245,7 +245,7 @@ const assignedChapterName = Array.isArray(chapterRelation)
 
               {classStatistics.length === 0 ? (
                 <p className="mt-6 text-gray-600">
-                  No badge information is available yet.
+                  No batch information is available yet.
                 </p>
               ) : (
                 <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -307,7 +307,7 @@ const assignedChapterName = Array.isArray(chapterRelation)
                   type="search"
                   name="q"
                   defaultValue={params.q ?? ""}
-                  placeholder="Name, KPX number, phone, WhatsApp, badge year, status..."
+                  placeholder="Name, KPX number, phone, WhatsApp, batch year, status..."
                   className="min-w-0 flex-1 rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-blue-700 focus:ring-2 focus:ring-blue-100"
                 />
 
@@ -336,7 +336,7 @@ const assignedChapterName = Array.isArray(chapterRelation)
                     No members found
                   </h3>
                   <p className="mt-3 text-gray-600">
-                    Try another name, member ID, phone number, badge year or status.
+                    Try another name, member ID, phone number, batch year or status.
                   </p>
                 </div>
               ) : (

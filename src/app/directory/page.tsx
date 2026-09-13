@@ -102,7 +102,7 @@ export default async function DirectoryPage({
 
           <p className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-blue-100">
             Search registered members by name, preferred name, KUPEXSA member ID,
-            phone, WhatsApp, occupation, school years, badge, chapter or country.
+            phone, WhatsApp, occupation, school years, batch, chapter or country.
           </p>
 
           <div className="mt-8 flex flex-wrap justify-center gap-4">
@@ -195,7 +195,7 @@ export default async function DirectoryPage({
                   name="q"
                   type="search"
                   defaultValue={params.q ?? ""}
-                  placeholder="Name, nickname, KPX number, phone, WhatsApp, occupation, badge or year"
+                  placeholder="Name, nickname, KPX number, phone, WhatsApp, occupation, batch or year"
                   className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3.5 outline-none transition focus:border-blue-700 focus:ring-2 focus:ring-blue-100"
                 />
 
@@ -276,7 +276,7 @@ export default async function DirectoryPage({
                 </h3>
 
                 <p className="mx-auto mt-3 max-w-xl leading-7 text-gray-600">
-                  Try a different name, KUPEXSA number, phone fragment, occupation, badge or year.
+                  Try a different name, KUPEXSA number, phone fragment, occupation, batch or year.
                 </p>
 
                 <Link
@@ -359,7 +359,7 @@ export default async function DirectoryPage({
 
                         <p>
                           <span className="font-semibold text-blue-950">
-                            Badge:
+                            Batch:
                           </span>{" "}
                           {member.badge?.displayName ?? "Not assigned"}
                         </p>
