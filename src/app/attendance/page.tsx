@@ -1,4 +1,4 @@
-"use client";
+
 
 import Link from "next/link";
 import { FormEvent, useCallback, useEffect, useState } from "react";
@@ -70,46 +70,88 @@ async function getCurrentPosition(): Promise<GeolocationPosition> {
     );
   }
 
-  const readings: GeolocationPosition[] = [];
-  let lastError: GeolocationPositionError | null = null;
+  return new Promise<GeolocationPosition>((resolve, reject) => {
+    const readings: GeolocationPosition[] = [];
+    let bestPosition: GeolocationPosition | null = null;
+    let finished = false;
+    let watchId: number | null = null;
 
-  for (let attempt = 0; attempt < 3; attempt += 1) {
-    try {
-      const position = await new Promise<GeolocationPosition>(
-        (resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(resolve, reject, {
-            enableHighAccuracy: true,
-            timeout: 12000,
-            maximumAge: 0,
-          });
-        }
+    const finishWithBest = () => {
+      if (finished) return;
+
+      finished = true;
+
+      if (watchId !== null) {
+        navigator.geolocation.clearWatch(watchId);
+      }
+
+      if (bestPosition) {
+        resolve(bestPosition);
+        return;
+      }
+
+      reject(
+        new Error(
+          "Your location could not be determined accurately. Please make sure Location/GPS is enabled and try again."
+        )
       );
+    };
 
-      readings.push(position);
+    const timer = window.setTimeout(() => {
+      finishWithBest();
+    }, 15000);
 
-      if (position.coords.accuracy <= 25) {
-        break;
+    watchId = navigator.geolocation.watchPosition(
+      (position) => {
+        readings.push(position);
+
+        if (
+          !bestPosition ||
+          position.coords.accuracy < bestPosition.coords.accuracy
+        ) {
+          bestPosition = position;
+        }
+
+        if (position.coords.accuracy <= 20) {
+          window.clearTimeout(timer);
+          finishWithBest();
+          return;
+        }
+
+        if (
+          readings.length >= 4 &&
+          bestPosition &&
+          bestPosition.coords.accuracy <= 50
+        ) {
+          window.clearTimeout(timer);
+          finishWithBest();
+        }
+      },
+      (error) => {
+        if (finished) return;
+
+        if (readings.length > 0 && bestPosition) {
+          window.clearTimeout(timer);
+          finishWithBest();
+          return;
+        }
+
+        finished = true;
+        window.clearTimeout(timer);
+
+        if (watchId !== null) {
+          navigator.geolocation.clearWatch(watchId);
+        }
+
+        reject(error);
+      },
+      {
+        enableHighAccuracy: true,
+        maximumAge: 0,
+        timeout: 15000,
       }
-
-      if (attempt < 2) {
-        await new Promise((resolve) => setTimeout(resolve, 1200));
-      }
-    } catch (error) {
-      lastError = error as GeolocationPositionError;
-
-      if (attempt < 2) {
-        await new Promise((resolve) => setTimeout(resolve, 1200));
-      }
-    }
-  }
-
-  if (readings.length === 0) {
-    throw lastError ?? new Error("Location could not be determined.");
-  }
-
-  return readings.reduce((best, current) =>
-    current.coords.accuracy < best.coords.accuracy ? current : best
-  );
+    );
+  });
 }
 
 function locationErrorMessage(error: unknown) {
@@ -333,12 +375,25 @@ export default function AttendancePage() {
 
     try {
       const position = await getCurrentPosition();
+      const adminAccuracy = position.coords.accuracy;
+
+      if (!Number.isFinite(adminAccuracy) || adminAccuracy > 100) {
+        setMessage(
+          `Your current location is not accurate enough to safely start attendance (approximately ${
+            Number.isFinite(adminAccuracy) ? adminAccuracy.toFixed(0) : "unknown"
+          } metres accuracy). Please keep Location/GPS enabled, move near a window or outdoors if possible, then try again.`
+        );
+        setMessageType("error");
+        return;
+      }
+
       const supabase = createClient();
 
-      const { error } = await supabase.rpc("start_attendance_session", {
+      const { error } = await supabase.rpc("start_attendance_session_v2", {
         meeting_title: title,
         admin_latitude: position.coords.latitude,
         admin_longitude: position.coords.longitude,
+        admin_accuracy_meters: position.coords.accuracy,
       });
 
    if (error) {
