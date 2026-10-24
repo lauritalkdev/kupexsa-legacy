@@ -53,7 +53,13 @@ export default function Navbar() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [isChapterAdmin, setIsChapterAdmin] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const visibleNavigationLinks = navigationLinks.filter((link) => {
+    if (loggedIn && link.href === "/") return false;
+    if (!loggedIn && link.href === "/directory") return false;
+    return true;
+  });
 
   useEffect(() => {
     const supabase = createClient();
@@ -174,7 +180,7 @@ export default function Navbar() {
 
           {/* Desktop navigation */}
           <div className="hidden items-center gap-1 lg:flex">
-            {navigationLinks.map((link) => {
+            {visibleNavigationLinks.map((link) => {
               const active = isActiveLink(link.href);
 
               return (
@@ -316,7 +322,7 @@ export default function Navbar() {
         {mobileMenuOpen && (
           <div className="border-t border-gray-200 pb-6 pt-4 lg:hidden">
             <div className="flex flex-col gap-2">
-              {navigationLinks.map((link) => {
+              {visibleNavigationLinks.map((link) => {
                 const active = isActiveLink(link.href);
 
                 return (

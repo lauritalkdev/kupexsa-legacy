@@ -80,6 +80,24 @@ function optionalValue(value: string) {
   return trimmed.length > 0 ? trimmed : null;
 }
 
+function normalizeChapterName(value: string) {
+  return value
+    .trim()
+    .replace(/\s+/g, " ")
+    .replace(/\s+chapter$/i, "")
+    .trim()
+    .toLocaleLowerCase();
+}
+
+function formatCustomChapter(value: string) {
+  const name = value.trim().replace(/\s+/g, " ").replace(/\s+chapter$/i, "").trim();
+  return `${name} Chapter`;
+}
+
+const INVALID_CHAPTER_NAMES = new Set([
+  "none", "n/a", "na", "not applicable", "no chapter", "unknown",
+]);
+
 function optionalNumber(value: string) {
   if (!value.trim()) {
     return null;
@@ -219,7 +237,7 @@ export default function ProfileForm({
   );
   const [badgeId, setBadgeId] = useState(profile.badge_id ?? "");
   const [countryId, setCountryId] = useState(profile.country_id ?? "");
-  const [chapterId, setChapterId] = useState(profile.chapter_id ?? "");
+  const [chapterId, setChapterId] = useState(profile.chapter_id ?? (profile.custom_chapter ? "__other__" : ""));
   const [customChapter, setCustomChapter] = useState(
     profile.custom_chapter ?? ""
   );
@@ -246,16 +264,10 @@ export default function ProfileForm({
     "success" | "error" | ""
   >("");
 
-  const filteredChapters = useMemo(() => {
-    if (!countryId) {
-      return chapters;
-    }
-
-    return chapters.filter(
-      (chapter) =>
-        !chapter.country_id || chapter.country_id === countryId
-    );
-  }, [chapters, countryId]);
+  const filteredChapters = useMemo(
+    () => chapters.filter((chapter) => chapter.is_active || chapter.id === chapterId),
+    [chapters, chapterId]
+  );
 
   const otherOccupation = useMemo(
     () =>
@@ -398,26 +410,8 @@ export default function ProfileForm({
   }
 
   function handleCountryChange(value: string) {
+    // Residence and KUPEXSA chapter affiliation are independent.
     setCountryId(value);
-
-    if (!value) {
-      return;
-    }
-
-    if (chapterId === "__other__") {
-      return;
-    }
-
-    const currentChapter = chapters.find(
-      (chapter) => chapter.id === chapterId
-    );
-
-    if (
-      currentChapter?.country_id &&
-      currentChapter.country_id !== value
-    ) {
-      setChapterId("");
-    }
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -448,8 +442,21 @@ export default function ProfileForm({
       return;
     }
 
-    if (isOtherChapter && !customChapter.trim()) {
+    const normalizedCustomChapter = normalizeChapterName(customChapter);
+    if (isOtherChapter && !normalizedCustomChapter) {
       setMessage("Please enter your KUPEXSA chapter.");
+      setMessageType("error");
+      return;
+    }
+
+    if (isOtherChapter && INVALID_CHAPTER_NAMES.has(normalizedCustomChapter)) {
+      setMessage("Please enter a valid chapter name, or leave the chapter unselected.");
+      setMessageType("error");
+      return;
+    }
+
+    if (isOtherChapter && !countryId) {
+      setMessage("Please select your country before registering a new chapter.");
       setMessageType("error");
       return;
     }
@@ -464,6 +471,22 @@ export default function ProfileForm({
 
     try {
       const supabase = createClient();
+      let resolvedChapterId = isOtherChapter ? null : chapterId || null;
+
+      if (isOtherChapter) {
+        const { data: registeredChapterId, error: chapterError } =
+          await supabase.rpc("register_kupexsa_chapter", {
+            requested_name: customChapter.trim(),
+            requested_country_id: countryId,
+          });
+
+        if (chapterError) throw chapterError;
+        if (!registeredChapterId) {
+          throw new Error("The chapter could not be registered. Please try again.");
+        }
+        resolvedChapterId = registeredChapterId;
+      }
+
       const uploadedProfilePhoto = await uploadSelectedPhoto();
 
       const { error } = await supabase
@@ -479,10 +502,8 @@ export default function ProfileForm({
           graduation_year: parsedGraduationYear,
           badge_id: badgeId || null,
           country_id: countryId || null,
-          chapter_id: isOtherChapter ? null : chapterId || null,
-          custom_chapter: isOtherChapter
-            ? optionalValue(customChapter)
-            : null,
+          chapter_id: resolvedChapterId,
+          custom_chapter: null,
           occupation_id: occupationId || null,
           custom_occupation: isOtherOccupation
             ? optionalValue(customOccupation)
@@ -505,6 +526,10 @@ export default function ProfileForm({
         },
       });
 
+      if (isOtherChapter && resolvedChapterId) {
+        setChapterId(resolvedChapterId);
+        setCustomChapter("");
+      }
       setSelectedPhoto(null);
       setPhotoNote("");
       setMessage("Your KUPEXSA profile has been updated successfully.");
