@@ -279,6 +279,26 @@ export default async function DashboardPage() {
   const statusDetails = getStatusDetails(profile.status);
   const profileCompletion = calculateProfileCompletion(profile);
 
+  // Annual Global Dues are independent of account verification.
+  const currentDuesYear = new Date().getFullYear();
+
+  const { data: annualDuesData, error: annualDuesError } = await supabase
+    .from("annual_dues")
+    .select("year")
+    .eq("member_id", user.id)
+    .order("year", { ascending: false });
+
+  const paidDuesYears = annualDuesError
+    ? []
+    : Array.from(
+        new Set((annualDuesData ?? []).map((record) => record.year))
+      ).sort((a, b) => b - a);
+
+  const currentDuesPaid = paidDuesYears.includes(currentDuesYear);
+  const historicalPaidYears = paidDuesYears.filter(
+    (year) => year !== currentDuesYear
+  );
+
   const displayName =
     profile.preferred_name?.trim() ||
     profile.full_name?.trim().split(/\s+/)[0] ||
@@ -462,6 +482,52 @@ export default async function DashboardPage() {
                     {chapterName ?? "Not assigned"}
                   </p>
                 </div>
+              </div>
+
+              {/* Annual Global Dues */}
+              <div className="mt-8 border-t border-white/15 pt-6">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-yellow-400">
+                  Annual Global Dues
+                </p>
+
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                  <p className="text-sm font-medium text-blue-200">
+                    {currentDuesYear} Payment Status
+                  </p>
+
+                  {annualDuesError ? (
+                    <span className="rounded-full bg-gray-400/15 px-3 py-1 text-sm font-semibold text-gray-200">
+                      Status Unavailable
+                    </span>
+                  ) : currentDuesPaid ? (
+                    <span className="rounded-full bg-green-400/15 px-3 py-1 text-sm font-bold text-green-300">
+                      {currentDuesYear} Paid
+                    </span>
+                  ) : (
+                    <span className="rounded-full bg-yellow-400/15 px-3 py-1 text-sm font-semibold text-yellow-300">
+                      Not Yet Registered
+                    </span>
+                  )}
+                </div>
+
+                {!annualDuesError && historicalPaidYears.length > 0 && (
+                  <div className="mt-5">
+                    <p className="text-xs font-medium text-blue-300">
+                      Previous Years Paid
+                    </p>
+
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {historicalPaidYears.map((year) => (
+                        <span
+                          key={year}
+                          className="rounded-full border border-green-400/30 bg-green-400/10 px-3 py-1 text-xs font-semibold text-green-200"
+                        >
+                          {year} Paid
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="mt-8 border-t border-white/15 pt-5">
