@@ -8,6 +8,8 @@ import {
   FOUNDATION_YEAR,
 } from "@/lib/constants";
 
+export const revalidate = 60;
+
 const heritageEras = [
   {
     year: "1963",
@@ -117,6 +119,28 @@ const highlights = [
 export default function Home() {
   return (
     <main className="overflow-hidden bg-white">
+      {/* Public bid invitation — expires after 28 November, Cameroon time */}
+      {Date.now() < Date.parse("2026-11-29T00:00:00+01:00") && (
+        <section aria-label="Public bid invitation" className="border-b border-yellow-500 bg-blue-950 text-white">
+          <div className="mx-auto flex max-w-7xl flex-col gap-5 px-6 py-7 sm:flex-row sm:items-center sm:justify-between lg:px-8">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-yellow-400">
+                Public Bid Invitation — Project CP-8
+              </p>
+              <h2 className="mt-2 text-xl font-black sm:text-2xl">
+                Food &amp; Nutrition Laboratory Repairs / Equipment Upgrades
+              </h2>
+              <p className="mt-2 text-sm text-blue-100">
+                PHS Kumba · Open to qualified contractors · Submission deadline: 28 November 2026
+              </p>
+            </div>
+            <Link href="/bid-invitation" className="inline-flex shrink-0 items-center justify-center rounded-xl bg-yellow-500 px-6 py-3 font-bold text-blue-950 transition hover:bg-yellow-400">
+              View Bid Invitation →
+            </Link>
+          </div>
+        </section>
+      )}
+
       {/* Hero */}
       <section className="relative isolate bg-blue-950 text-white">
         <div className="absolute inset-0 -z-20 bg-[radial-gradient(circle_at_top_right,rgba(212,175,55,0.22),transparent_34%),radial-gradient(circle_at_bottom_left,rgba(30,64,175,0.55),transparent_38%)]" />
