@@ -106,6 +106,13 @@ const contacts = [
     phone: "+44 7846 815935",
     whatsapp: "447846815935",
   },
+  {
+    name: "Eng. Ngwa Suh Elias",
+    role: "Project Contact",
+    country: "",
+    phone: "+244928645339",
+    whatsapp: "244928645339",
+  },
 ];
 
 type Contact = (typeof contacts)[number];
@@ -150,9 +157,11 @@ function ContactCard({ contact }: { contact: Contact }) {
         {contact.name}
       </h3>
 
-      <p className="mt-2 text-sm text-gray-500">
-        {contact.country}
-      </p>
+      {contact.country && (
+        <p className="mt-2 text-sm text-gray-500">
+          {contact.country}
+        </p>
+      )}
 
       <a
         href={getWhatsAppLink(contact)}
@@ -626,6 +635,21 @@ export default function BidInvitationPage() {
                 (contact) =>
                   contact.country === "United Kingdom"
               )
+              .map((contact) => (
+                <ContactCard
+                  key={contact.whatsapp}
+                  contact={contact}
+                />
+              ))}
+          </div>
+
+          <h3 className="mt-10 text-xl font-bold text-blue-950">
+            Additional Project Contacts
+          </h3>
+
+          <div className="mt-5 grid gap-5 md:grid-cols-2">
+            {contacts
+              .filter((contact) => contact.whatsapp === "244928645339")
               .map((contact) => (
                 <ContactCard
                   key={contact.whatsapp}
